@@ -326,7 +326,7 @@ function getTargetTemperature(context, event) {
         };
 
         var value = parseFloat(items.targetTemperature.state);
-        var mode = utils.normalizeThermostatMode(items.heatingCoolingMode ? items.heatingCoolingMode.state : 'Unknown Mode');
+        var mode = items.heatingCoolingMode ? utils.normalizeThermostatMode(items.heatingCoolingMode.state) : 'Unknown Mode';
 
         var payload = {
           targetTemperature: {
@@ -656,41 +656,39 @@ function discoverDevices(token, success, failure) {
 * Given an item, returns an array of action that are supported.
 **/
 function getSwitchableActions(item) {
-    var actions = null;
-    if (item.type === 'Switch' ||
-        (item.type === 'Group' && item.groupType && item.groupType === 'Switch')) {
-        actions = [
-            'turnOn',
-            'turnOff'
-        ];
-    } else if (item.type === 'Dimmer' ||
-        (item.type === 'Group' && item.groupType && item.groupType === 'Dimmer')) {
-        actions = [
-            'incrementPercentage',
-            'decrementPercentage',
-            'setPercentage',
-            'turnOn',
-            'turnOff'
-        ];
-    } else if (item.type === 'Color' ||
-        (item.type === 'Group' && item.groupType && item.groupType === 'Color')) {
-        actions = [
-            'incrementPercentage',
-            'decrementPercentage',
-            'setPercentage',
-            'turnOn',
-            'turnOff',
-            'setColor'
-        ];
-    } else if (item.type === 'Rollershutter' ||
-        (item.type === 'Group' && item.groupType && item.groupType === 'Rollershutter')) {
-        actions = [
-            'setPercentage',
-            'incrementPercentage',
-            'decrementPercentage'
-        ];
+    if (item.groupType || item.type !== 'Group') {
+        switch (item.type === 'Group' ? item.groupType : item.type) {
+            case 'Switchable':
+                return [
+                    'turnOn',
+                    'turnOff'
+                ];
+            case 'Dimmer':
+                return [
+                    'incrementPercentage',
+                    'decrementPercentage',
+                    'setPercentage',
+                    'turnOn',
+                    'turnOff'
+                ];
+            case 'Color':
+                return [
+                    'incrementPercentage',
+                    'decrementPercentage',
+                    'setPercentage',
+                    'turnOn',
+                    'turnOff',
+                    'setColor'
+                ];
+            case 'Rollershutter':
+                return [
+                    'setPercentage',
+                    'incrementPercentage',
+                    'decrementPercentage'
+                ];
+        }
     }
-    return actions;
+    return null;
 }
 /**
 * Rerturns a thermostat object based on memebers of a thermostat tagged group
